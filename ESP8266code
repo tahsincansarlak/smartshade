@@ -1,0 +1,107 @@
+// Tahsin Can Sarlak
+// 09/28/2019
+// Smart Shade Project
+
+// This code controls a DC motor via Blynk app and physical buttons. The motor rotates according 
+// to the buttons used and the value assigned on Blynk app.
+
+// Defines and includes the necessary libraries to connect ESP8266 to Blynk app
+#define BLYNK_PRINT Serial
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+
+// You should get Auth Token in the Blynk App.
+// Go to the Project Settings (nut icon).
+// My Auth Token from Blynk app. This way the app can talk with ESP8266.
+char auth[] = "My TOKEN";
+
+// My WiFi credentials.
+char ssid[] = "WIFI NAME";
+char pass[] = "WIFI PASSWORD (you can leave it blank if there is no password)";
+
+// Initializes variables
+int up = 0;
+int down = 0;
+int stop_button = 0;
+
+// It reads a virtual pin that is controlled via Blynk app.
+BLYNK_WRITE(V1)
+{
+  // Reads the integer value and assigns it to a variable
+  int rolling = param.asInt(); 
+
+  // Calls the necessary functions according to read value
+  if (rolling == 1){
+    counterclockwise();
+     }
+     
+  else if (rolling == 2){
+    clockwise();
+  }
+  
+  else {
+    stop_it();
+  }
+}
+
+
+void setup() {
+  Serial.begin(9600);
+
+  // Connects to the app 
+  Blynk.begin(auth, ssid, pass);
+
+  // The pins that control the direction of the motor 
+  pinMode(4, OUTPUT); 
+  pinMode(5, OUTPUT);
+
+  // Pins that are connected to the buttons on the breadboard
+  pinMode(12, INPUT);
+  pinMode(13,INPUT);
+  pinMode(14,INPUT);
+}
+
+void loop() {
+  // Calls the Blynk app
+  Blynk.run();
+  
+  // Calls the function that reads the physical buttons 
+  buttons();
+}
+
+// Controls the shades up, down and stop
+void buttons(){ 
+  // Reads the buttons
+  up = digitalRead(12);
+  down = digitalRead(13);
+  stop_button = digitalRead(14);
+
+  // Moves the motor according to the buttons
+  if ( up == HIGH){
+    clockwise();
+  }
+  
+  if (down ==HIGH){
+    counterclockwise();
+  }
+  if (stop_button == HIGH){
+    stop_it();
+  }
+}
+
+// Turns motor clockwise
+void clockwise() {
+  digitalWrite(4, HIGH);
+  digitalWrite(5, LOW);
+}
+
+// Turns motor counterclockwise
+void counterclockwise() {
+  digitalWrite(4, LOW);
+  digitalWrite(5, HIGH);
+}
+// Stops the motor
+void stop_it(){
+  digitalWrite(4, LOW);
+  digitalWrite(5, LOW);
+}
